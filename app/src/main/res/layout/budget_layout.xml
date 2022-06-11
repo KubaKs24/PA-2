@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingEnd="5dp"
+    android:paddingStart="5dp"
+    android:paddingTop="5dp"
+    android:paddingBottom="5dp">
+
+    <EditText
+        android:id="@+id/etValueBudget"
+        android:layout_width="100dp"
+        android:layout_height="50dp"
+        android:hint="Price" />
+
+    <EditText
+        android:id="@+id/etTypeBudget"
+        android:layout_width="280dp"
+        android:layout_height="50dp"
+        android:layout_marginStart="20dp"
+        android:layout_toEndOf="@+id/etValueBudget"
+        android:hint="Expense type" />
+
+    <Button
+        android:id="@+id/btnAddBudget"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/etValueBudget"
+        android:layout_marginStart="5dp"
+        android:layout_marginTop="10dp"
+        android:text="Add" />
+
+    <Button
+        android:id="@+id/btnDelBudget"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/etValueBudget"
+        android:layout_marginStart="5dp"
+        android:layout_marginTop="10dp"
+        android:layout_toEndOf="@+id/btnAddBudget"
+        android:text="Del" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/etValueBudget"
+        android:layout_marginStart="115dp"
+        android:layout_marginTop="10dp"
+        android:layout_toEndOf="@+id/btnDelBudget"
+        android:text="Menu"
+        android:onClick="goMenu"/>
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/etValueBudget"
+        android:layout_marginStart="5dp"
+        android:layout_marginTop="10dp"
+        android:layout_toEndOf="@+id/btnDelBudget"
+        android:onClick="generateChart"
+        android:text="Chart" />
+
+    <ListView
+        android:id="@+id/lvBudget"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/btnAddBudget"
+        android:layout_marginTop="10dp" />
+
+
+</RelativeLayout>
