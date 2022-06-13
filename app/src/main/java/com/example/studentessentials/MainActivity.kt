@@ -1,86 +1,95 @@
 package com.example.studentessentials
 
+import android.content.Intent
 import android.graphics.Color
-import androidx.appcompat.app.AppCompatActivity
+import android.net.Uri
 import android.os.Bundle
 import android.view.View
 import android.widget.*
-import com.github.mikephil.charting.components.Legend
-import com.github.mikephil.charting.components.YAxis
+import androidx.activity.result.ActivityResult
+import androidx.activity.result.ActivityResultCallback
+import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
+import androidx.appcompat.app.AppCompatActivity
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.github.mikephil.charting.data.BarData
 import com.github.mikephil.charting.data.BarDataSet
 import com.github.mikephil.charting.data.BarEntry
-import com.github.mikephil.charting.utils.ColorTemplate
+import com.github.mikephil.charting.interfaces.datasets.IBarDataSet
 import kotlinx.android.synthetic.main.budget_layout.*
 import kotlinx.android.synthetic.main.budgetchart.*
 import kotlinx.android.synthetic.main.calendar_layout.*
+import kotlinx.android.synthetic.main.notes_layout.*
 import java.time.LocalDate
+import kotlin.random.Random
+import com.bumptech.glide.annotation.GlideModule
+import com.bumptech.glide.module.AppGlideModule
 
-class MainActivity : AppCompatActivity() {
+
+open class MainActivity : AppCompatActivity() {
     private lateinit var calendarView: CalendarView
     private lateinit var dateView: TextView
     private lateinit var event: String
     private lateinit var date: String
     private lateinit var evitem: String
     private lateinit var eventList: MutableList<String>
+    private lateinit var adapterEvent: ArrayAdapter<String>
 
+    private lateinit var adapterBudget: ArrayAdapter<String>
     private lateinit var budgetList: MutableList<String>
-    private lateinit var typeBudget: String
-    private lateinit var typeBudgetList: List<String>
     private lateinit var valueBudget: String
-    private lateinit var valuesBudgetFood: MutableList<Float>
-    private lateinit var valuesBudgetTransport: MutableList<Float>
-    private lateinit var valuesBudgetClothes: MutableList<Float>
-    private lateinit var valuesBudgetEntertainment: MutableList<Float>
+    private lateinit var budgetExpenses: MutableList<Expense>
+    private lateinit var adapterNote: NoteAdapter
+    private lateinit var noteList: MutableList<Note>
+    private lateinit var noteTitle: String
+
+
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         eventList = mutableListOf()
         budgetList = mutableListOf()
-        typeBudgetList = listOf("Food", "Transport", "Clothes", "Entertainment")
-
-        valuesBudgetFood = mutableListOf()
-        valuesBudgetTransport = mutableListOf()
-        valuesBudgetClothes = mutableListOf()
-        valuesBudgetEntertainment = mutableListOf()
-
+        budgetExpenses = mutableListOf()
+        noteList = mutableListOf()
 
     }
 
     fun goCalendar(view: View) {
         setContentView(R.layout.calendar_layout)
+
+        adapterEvent = ArrayAdapter(
+            this,
+            android.R.layout.simple_list_item_checked, eventList
+        )
+        lvEvent.adapter = adapterEvent
+        adapterEvent.notifyDataSetChanged()
+
         calendarView = findViewById(R.id.cvDate)
         dateView = findViewById(R.id.dateView)
-        calendarView.setOnDateChangeListener { calendarView, year, month, dayOfMonth ->
+        calendarView.setOnDateChangeListener { _, year, month, dayOfMonth ->
             date = dayOfMonth.toString() + "-" + (month + 1) + "-" + year
             dateView.text = date
         }
         val btnDelEvent = findViewById<Button>(R.id.bttDel)
         lvEvent.setOnItemClickListener { _, _, position, _ ->
-            val eventPos = position
             Toast.makeText(this, "Event chosen", Toast.LENGTH_SHORT).show()
 
-        btnDelEvent.setOnClickListener {
-            val adapterEvDel: ArrayAdapter<String> = ArrayAdapter(this,
-                android.R.layout.simple_list_item_checked, eventList)
-            lvEvent.adapter = adapterEvDel
-            eventList.removeAt(eventPos)
-            adapterEvDel.notifyDataSetChanged()
-        }
+            btnDelEvent.setOnClickListener {
+                eventList.removeAt(position)
+                adapterEvent.notifyDataSetChanged()
+            }
         }
 
     }
-    fun addEvent(view: View){
-        val adapterEvAdd: ArrayAdapter<String> = ArrayAdapter(this,
-            android.R.layout.simple_list_item_checked, eventList)
-        lvEvent.adapter = adapterEvAdd
+
+    fun addEvent(view: View) {
+
         event = etEvent.text.toString()
-        if(event.isEmpty()){
+        if (event.isEmpty()) {
             Toast.makeText(this, "No event given", Toast.LENGTH_SHORT).show()
-        }
-        else {
+        } else {
             evitem = ("$event -> $date")
-            adapterEvAdd.add(evitem)
+            adapterEvent.add(evitem)
             etEvent.text.clear()
         }
 
@@ -89,107 +98,110 @@ class MainActivity : AppCompatActivity() {
     fun goMenu(view: View) {
         setContentView(R.layout.activity_main)
     }
-    fun goBudget(view: View){
+
+    fun goBudget(view: View) {
         setContentView(R.layout.budget_layout)
+        var counter = 0
+
+
+        adapterBudget = ArrayAdapter(this, android.R.layout.simple_list_item_checked, budgetList)
+        lvBudget.adapter = adapterBudget
+        adapterBudget.notifyDataSetChanged()
 
         val btnDelBudg = findViewById<Button>(R.id.btnDelBudget)
         val btnAddBudg = findViewById<Button>(R.id.btnAddBudget)
 
-        lvBudget.setOnItemClickListener { _, _, position, _ ->
-            val budgPos = position
-            Toast.makeText(this, "Expense chosen", Toast.LENGTH_SHORT).show()
-
-            btnDelBudg.setOnClickListener {
-                val adapterBudgDel: ArrayAdapter<String> = ArrayAdapter(this,
-                    android.R.layout.simple_list_item_checked, budgetList)
-                lvBudget.adapter = adapterBudgDel
-                budgetList.removeAt(budgPos)
-                adapterBudgDel.notifyDataSetChanged()
-            }
-        }
-
-        btnAddBudg.setOnClickListener{
-            val adapterBudgAdd: ArrayAdapter<String> = ArrayAdapter(this,
-                android.R.layout.simple_list_item_checked, budgetList)
-            lvBudget.adapter = adapterBudgAdd
+        btnAddBudg.setOnClickListener {
             valueBudget = etValueBudget.text.toString()
-            typeBudget = etTypeBudget.text.toString()
+            val typeBudgetFromUser = etTypeBudget.text.toString()
+            val typeBudget: ExpenseType? = ExpenseType.values()
+                .firstOrNull { it.name == typeBudgetFromUser }
             val budgItem: String
             val currentDateBudg: String
 
 
-            if(valueBudget.isEmpty() or typeBudget.isEmpty()){
-                Toast.makeText(this, "No enough info given", Toast.LENGTH_SHORT).show()
-            }
-            else if (typeBudget !in typeBudgetList){
-                Toast.makeText(this, "Unknown expense, try: Food, Transport, Clothes, Entertainment", Toast.LENGTH_SHORT).show()
-            }
-            else{
-                currentDateBudg = LocalDate.now().toString()
-                budgItem = ("$valueBudget zl for $typeBudget on $currentDateBudg")
-                val valueToAddBudget = etValueBudget.text.toString().toFloat()
-                etTypeBudget.text.clear()
-                etValueBudget.text.clear()
-
-                when (typeBudget) {
-                    in "Food" -> {
-                        valuesBudgetFood.add(valueToAddBudget)
-                        adapterBudgAdd.add(budgItem)
-                    }
-                    in "Clothes" -> {
-                        valuesBudgetClothes.add(valueToAddBudget)
-                        adapterBudgAdd.add(budgItem)
-                    }
-                    in "Transport" -> {
-                        valuesBudgetEntertainment.add(valueToAddBudget)
-                        adapterBudgAdd.add(budgItem)
-                    }
-                    in "Entertainment" -> {
-                        valuesBudgetTransport.add(valueToAddBudget)
-                        adapterBudgAdd.add(budgItem)
-                    }
+            when {
+                valueBudget.isEmpty() -> {
+                    Toast.makeText(this, "No enough info given", Toast.LENGTH_SHORT).show()
                 }
+                typeBudgetFromUser !in ExpenseType.values().map { it.name } -> {
+                    Toast.makeText(
+                        this,
+                        "Unknown expense, try: Food, Transport, Clothes, Entertainment",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+                else -> {
+                    currentDateBudg = LocalDate.now().toString()
+                    budgItem = ("$valueBudget zl for $typeBudget on $currentDateBudg")
+
+                    try {
+                        val valueToAddBudget = etValueBudget.text.toString().toFloat()
+
+                        typeBudget?.let {
+                            val budgetExToAdd = Expense(
+                                counter,
+                                valueToAddBudget,
+                                currentDateBudg,
+                                it
+                            )
+                            budgetExpenses.add(
+                                budgetExToAdd
+                            )
+                            adapterBudget.add(budgItem)
+                        }
+                        counter++
+                        Toast.makeText(this, budgetExpenses.size.toString(), Toast.LENGTH_SHORT)
+                            .show()
+
+                    } catch (nfe: NumberFormatException) {
+                        Toast.makeText(this, "Price need to be number!!!", Toast.LENGTH_SHORT)
+                            .show()
+                    }
+
+                    etTypeBudget.text.clear()
+                    etValueBudget.text.clear()
+
+                }
+            }
+        }
+        lvBudget.setOnItemClickListener { _, _, position, _ ->
+            Toast.makeText(this, " Expense chosen", Toast.LENGTH_SHORT).show()
+
+            btnDelBudg.setOnClickListener {
+
+                budgetList.removeAt(position)
+                budgetExpenses.removeAt(position)
+                adapterBudget.notifyDataSetChanged()
             }
         }
     }
 
-    fun generateChart(view: View){
+    fun generateChart(view: View) {
         setContentView(R.layout.budgetchart)
+        val rnd = Random(3)
 
-        val foodSum = valuesBudgetFood.sum()
-        val clothesSum = valuesBudgetClothes.sum()
-        val enterSum = valuesBudgetEntertainment.sum()
-        val transportSum = valuesBudgetTransport.sum()
+        var xVal = 1
+        val setBudgetList = mutableListOf<BarDataSet>()
 
+        for (t in ExpenseType.values()) {
+            val amount =
+                budgetExpenses.filter { it.expenseType == t }.map { it.value }.sum()
 
-        val barBudgetList = ArrayList<BarEntry>()
-        val barBudgetList1 = ArrayList<BarEntry>()
-        val barBudgetList2 = ArrayList<BarEntry>()
-        val barBudgetList3 = ArrayList<BarEntry>()
-        barBudgetList.add(BarEntry(1f, foodSum))
-        barBudgetList1.add(BarEntry(2f, clothesSum))
-        barBudgetList2.add(BarEntry(3f, enterSum))
-        barBudgetList3.add(BarEntry(4f, transportSum))
+            val barBudgetList = ArrayList<BarEntry>()
+            barBudgetList.add(BarEntry(xVal.toFloat(), amount))
+            val setBudget = BarDataSet(barBudgetList, t.name)
+            setBudget.color = Color.argb(255, rnd.nextInt(256), rnd.nextInt(256), rnd.nextInt(256))
+            setBudget.valueTextSize = 20f
+            xVal++
+            setBudgetList.add(setBudget)
+        }
 
-        val setBudget = BarDataSet(barBudgetList, "Food")
-        val setBudget1 = BarDataSet(barBudgetList1, "Clothes")
-        val setBudget2 = BarDataSet(barBudgetList2, "Entertainment")
-        val setBudget3 = BarDataSet(barBudgetList3, "Transport")
-
-        setBudget.color = Color.BLACK
-        setBudget1.color = Color.BLUE
-        setBudget2.color = Color.GREEN
-        setBudget3.color = Color.RED
-
-        setBudget.valueTextSize = 20f
-        setBudget1.valueTextSize = 20f
-        setBudget2.valueTextSize = 20f
-        setBudget3.valueTextSize = 20f
-
-        val budgetData = BarData(setBudget, setBudget1, setBudget2, setBudget3)
+        val budgetData = BarData(setBudgetList as List<IBarDataSet>?)
 
         barBudgetChart.data = budgetData
-        barBudgetChart.legend.textSize = 16f
+        barBudgetChart.legend.textSize = 80f / xVal
+        barBudgetChart.legend.horizontalAlignment
         barBudgetChart.description.isEnabled = false
         barBudgetChart.xAxis.setDrawAxisLine(false)
         barBudgetChart.xAxis.setDrawGridLines(false)
@@ -198,15 +210,55 @@ class MainActivity : AppCompatActivity() {
     }
 
 
-
-    fun goCases(view: View){
+    fun goCases(view: View) {
         setContentView(R.layout.cases_layout)
     }
-    fun goDestination(view: View){
+
+    fun goDestination(view: View) {
         setContentView(R.layout.destination_layout)
     }
-    fun goNotes(view: View){
+    val imagePickerActivityResult = registerForActivityResult(
+        StartActivityForResult(), object : ActivityResultCallback<ActivityResult?> {
+            override fun onActivityResult(result: ActivityResult?) {
+                if (result != null) {
+                    val imageUri = result.getData()?.getData()!!
+                    val note = Note(noteTitle, imageUri = imageUri)
+                    adapterNote.addNote(note)
+                }
+            }
+        }
+    )
+
+    fun goNotes(view: View) {
         setContentView(R.layout.notes_layout)
+
+        adapterNote = NoteAdapter(noteList)
+        rvNotes.adapter = adapterNote
+        rvNotes.layoutManager = LinearLayoutManager(this)
+
+        btnNoteAdd.setOnClickListener {
+
+            noteTitle = etNoteEnter.text.toString()
+            if (noteTitle.isNotEmpty()) {
+                val galleryIntent = Intent(Intent.ACTION_PICK)
+                galleryIntent.type = "image/*"
+                imagePickerActivityResult.launch(galleryIntent)
+                etNoteEnter.text.clear()
+            } else {
+                Toast.makeText(this, "Please enter note", Toast.LENGTH_SHORT).show()
+            }
+        }
+        btnNoteDel.setOnClickListener {
+            adapterNote.deleteNote()
+        }
     }
 }
+    data class Expense(val id: Int,val value: Float, val date: String, val expenseType: ExpenseType)
+
+    enum class ExpenseType {
+        Food, Transport, Entertainment, Clothes
+    }
+
+
+
 
