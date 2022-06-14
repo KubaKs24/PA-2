@@ -3,12 +3,55 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:padding="5dp">
 
-    <ListView
-        android:layout_width="409dp"
-        android:layout_height="729dp"
+    <Button
+        android:id="@+id/btnChooseCase"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Choose case"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Menu"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:onClick="goMenu"/>
+
+    <Button
+        android:id="@+id/btnGenPdf"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="generate pdf"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/btnChooseCase"
+        android:layout_marginStart="5dp" />
+
+    <TextView
+        android:id="@+id/tvChCase"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="Your chosen case"
+        android:textAlignment="center"
+        android:textSize="30sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
+
+    <EditText
+        android:id="@+id/etCaseStudent"
+        android:layout_width="0dp"
+        android:paddingTop="25dp"
+        android:textSize="30sp"
+        android:layout_height="wrap_content"
+        android:hint="Name, Student id"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tvChCase" />
+
+
 </androidx.constraintlayout.widget.ConstraintLayout>

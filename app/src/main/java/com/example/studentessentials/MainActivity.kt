@@ -1,15 +1,20 @@
 package com.example.studentessentials
 
+import android.Manifest.permission.MANAGE_EXTERNAL_STORAGE
+import android.Manifest.permission.WRITE_EXTERNAL_STORAGE
 import android.content.Intent
-import android.graphics.Color
-import android.net.Uri
+import android.graphics.*
+import android.graphics.pdf.PdfDocument
 import android.os.Bundle
+import android.os.Environment
 import android.view.View
 import android.widget.*
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.ActivityResultCallback
 import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.github.mikephil.charting.data.BarData
 import com.github.mikephil.charting.data.BarDataSet
@@ -21,8 +26,10 @@ import kotlinx.android.synthetic.main.calendar_layout.*
 import kotlinx.android.synthetic.main.notes_layout.*
 import java.time.LocalDate
 import kotlin.random.Random
-import com.bumptech.glide.annotation.GlideModule
-import com.bumptech.glide.module.AppGlideModule
+import kotlinx.android.synthetic.main.cases_layout.*
+import java.io.File
+import java.io.FileOutputStream
+import java.io.IOException
 
 
 open class MainActivity : AppCompatActivity() {
@@ -42,16 +49,26 @@ open class MainActivity : AppCompatActivity() {
     private lateinit var noteList: MutableList<Note>
     private lateinit var noteTitle: String
 
-
+    private lateinit var listOfCases: Array<String>
+    private lateinit var logoPwrBMP: Bitmap
+    private lateinit var chosenCase: String
+    private lateinit var studentsData: String
+    private lateinit var currentDate: String
+    private lateinit var fileNameToSave: String
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+
         eventList = mutableListOf()
         budgetList = mutableListOf()
         budgetExpenses = mutableListOf()
         noteList = mutableListOf()
-
+        listOfCases = arrayOf("Dean's leave", "Resignation from studies", "Advance course")
+        logoPwrBMP = BitmapFactory.decodeResource(resources, R.drawable.pwrlogo)
+        chosenCase = ""
+        currentDate = LocalDate.now().toString()
     }
 
     fun goCalendar(view: View) {
@@ -209,11 +226,6 @@ open class MainActivity : AppCompatActivity() {
 
     }
 
-
-    fun goCases(view: View) {
-        setContentView(R.layout.cases_layout)
-    }
-
     fun goDestination(view: View) {
         setContentView(R.layout.destination_layout)
     }
@@ -252,7 +264,80 @@ open class MainActivity : AppCompatActivity() {
             adapterNote.deleteNote()
         }
     }
+    fun goCases(view: View) {
+        setContentView(R.layout.cases_layout)
+
+
+
+
+
+        btnChooseCase.setOnClickListener{
+            val mBuilder = AlertDialog.Builder(this@MainActivity)
+            mBuilder.setTitle("Choose an item")
+            mBuilder.setSingleChoiceItems(listOfCases, -1) { dialogInterface, i ->
+                tvChCase.text = listOfCases[i]
+                chosenCase = listOfCases[i]
+                dialogInterface.dismiss()
+            }
+            mBuilder.setNeutralButton("Back"){dialog, which->
+                dialog.cancel()
+            }
+            val mDialog = mBuilder.create()
+            mDialog.show()
+        }
+        btnGenPdf.setOnClickListener{
+            if (etCaseStudent.text.toString().isNotEmpty() and chosenCase.isNotEmpty()) {
+                studentsData = etCaseStudent.text.toString()
+                fileNameToSave = "/$studentsData-$chosenCase-$currentDate.pdf"
+                createPdfFile()
+                Toast.makeText(this, "File saved as: $fileNameToSave", Toast.LENGTH_SHORT).show()
+            }else{
+                Toast.makeText(this, "Need your data or case", Toast.LENGTH_SHORT).show()}
+
+        }
+    }
+    fun createPdfFile(){
+        val myPaint = Paint()
+        val pwrCase = PdfDocument()
+        val titlePaint = Paint()
+        val caseFile = File(Environment.getExternalStorageDirectory(), fileNameToSave)
+
+        val myPageInfo1 = PdfDocument.PageInfo.Builder(1200,2010, 1).create()
+        val myPage1 = pwrCase.startPage(myPageInfo1)
+        val canvas = myPage1.canvas
+        canvas.drawBitmap(logoPwrBMP, 0f, 0f, myPaint)
+        titlePaint.textAlign = Paint.Align.CENTER
+        titlePaint.typeface = Typeface.create(Typeface.DEFAULT, Typeface.BOLD)
+        titlePaint.textSize = 50f
+        canvas.drawText("Application for $chosenCase", 600f, 400f, titlePaint)
+
+        myPaint.textAlign = Paint.Align.RIGHT
+        myPaint.textSize = 40f
+        myPaint.color = Color.BLACK
+        canvas.drawText("Dean of the Faculty", 1180f , 650f, myPaint)
+        canvas.drawText("Faculty of Microsystems Electronics and Photonics", 1180f , 695f, myPaint)
+        canvas.drawText("Wrocław University of Science and Technology", 1180f , 740f, myPaint)
+
+        canvas.drawText("$currentDate", 1180f, 50f, myPaint)
+        canvas.drawText("--------------------------------------",1140f, 1580f, myPaint)
+        canvas.drawText("Signature and Date", 1150f, 1608f, myPaint)
+
+        myPaint.textAlign = Paint.Align.LEFT
+        canvas.drawText("$studentsData", 20f, 580f, myPaint)
+        canvas.drawText("Please consent to the ${chosenCase.lowercase()}", 20f, 1100f, myPaint)
+
+
+        pwrCase.finishPage(myPage1)
+        try{
+            with(pwrCase) { writeTo(FileOutputStream(caseFile)) }
+        }catch (E: IOException){
+            E.printStackTrace()
+        }
+        pwrCase.close()
+    }
 }
+
+
     data class Expense(val id: Int,val value: Float, val date: String, val expenseType: ExpenseType)
 
     enum class ExpenseType {
