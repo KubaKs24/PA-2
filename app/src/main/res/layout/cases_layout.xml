@@ -43,7 +43,7 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <EditText
-        android:id="@+id/etCaseStudent"
+        android:id="@+id/etCaseStudentId"
         android:layout_width="0dp"
         android:paddingTop="25dp"
         android:textSize="30sp"
@@ -52,6 +52,36 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/tvChCase" />
+    <EditText
+        android:id="@+id/etCaseStudentYr"
+        android:layout_width="0dp"
+        android:paddingTop="25dp"
+        android:textSize="30sp"
+        android:layout_height="wrap_content"
+        android:hint="Year"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/etCaseStudentId" />
+    <EditText
+        android:id="@+id/etCaseStudentSem"
+        android:layout_width="0dp"
+        android:paddingTop="25dp"
+        android:textSize="30sp"
+        android:layout_height="wrap_content"
+        android:hint="Semester"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/etCaseStudentYr" />
+    <EditText
+        android:id="@+id/etCaseStudentDgr"
+        android:layout_width="0dp"
+        android:paddingTop="25dp"
+        android:textSize="30sp"
+        android:layout_height="wrap_content"
+        android:hint="Degree"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/etCaseStudentSem" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

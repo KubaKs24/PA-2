@@ -52,9 +52,12 @@ open class MainActivity : AppCompatActivity() {
     private lateinit var listOfCases: Array<String>
     private lateinit var logoPwrBMP: Bitmap
     private lateinit var chosenCase: String
-    private lateinit var studentsData: String
+    private lateinit var studentsDataId: String
     private lateinit var currentDate: String
     private lateinit var fileNameToSave: String
+    private lateinit var studentsDataYr: String
+    private lateinit var studentsDataDgr: String
+    private lateinit var studentsDataSem: String
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -268,9 +271,6 @@ open class MainActivity : AppCompatActivity() {
         setContentView(R.layout.cases_layout)
 
 
-
-
-
         btnChooseCase.setOnClickListener{
             val mBuilder = AlertDialog.Builder(this@MainActivity)
             mBuilder.setTitle("Choose an item")
@@ -286,9 +286,12 @@ open class MainActivity : AppCompatActivity() {
             mDialog.show()
         }
         btnGenPdf.setOnClickListener{
-            if (etCaseStudent.text.toString().isNotEmpty() and chosenCase.isNotEmpty()) {
-                studentsData = etCaseStudent.text.toString()
-                fileNameToSave = "/$studentsData-$chosenCase-$currentDate.pdf"
+            if (etCaseStudentId.text.toString().isNotEmpty() and chosenCase.isNotEmpty() and etCaseStudentSem.text.toString().isNotEmpty() and etCaseStudentYr.text.toString().isNotEmpty() and etCaseStudentDgr.text.toString().isNotEmpty()) {
+                studentsDataYr = etCaseStudentYr.text.toString()
+                studentsDataDgr = etCaseStudentDgr.text.toString()
+                studentsDataSem = etCaseStudentSem.text.toString()
+                studentsDataId = etCaseStudentId.text.toString()
+                fileNameToSave = "/$studentsDataId-$chosenCase-$currentDate.pdf"
                 createPdfFile()
                 Toast.makeText(this, "File saved as: $fileNameToSave", Toast.LENGTH_SHORT).show()
             }else{
@@ -297,34 +300,40 @@ open class MainActivity : AppCompatActivity() {
         }
     }
     fun createPdfFile(){
-        val myPaint = Paint()
         val pwrCase = PdfDocument()
         val titlePaint = Paint()
         val caseFile = File(Environment.getExternalStorageDirectory(), fileNameToSave)
 
+        val myPaint = Paint()
         val myPageInfo1 = PdfDocument.PageInfo.Builder(1200,2010, 1).create()
         val myPage1 = pwrCase.startPage(myPageInfo1)
         val canvas = myPage1.canvas
         canvas.drawBitmap(logoPwrBMP, 0f, 0f, myPaint)
         titlePaint.textAlign = Paint.Align.CENTER
         titlePaint.typeface = Typeface.create(Typeface.DEFAULT, Typeface.BOLD)
-        titlePaint.textSize = 50f
+        titlePaint.textSize = 58f
         canvas.drawText("Application for $chosenCase", 600f, 400f, titlePaint)
+
+        titlePaint.textAlign = Paint.Align.RIGHT
+        titlePaint.textSize = 40f
+        canvas.drawText("Dean of the Faculty", 1180f , 850f, titlePaint)
+        canvas.drawText("Faculty of Microsystems Electronics and Photonics", 1180f , 895f, titlePaint)
+        canvas.drawText("Wrocław University of Science and Technology", 1180f , 940f, titlePaint)
 
         myPaint.textAlign = Paint.Align.RIGHT
         myPaint.textSize = 40f
         myPaint.color = Color.BLACK
-        canvas.drawText("Dean of the Faculty", 1180f , 650f, myPaint)
-        canvas.drawText("Faculty of Microsystems Electronics and Photonics", 1180f , 695f, myPaint)
-        canvas.drawText("Wrocław University of Science and Technology", 1180f , 740f, myPaint)
 
-        canvas.drawText("$currentDate", 1180f, 50f, myPaint)
-        canvas.drawText("--------------------------------------",1140f, 1580f, myPaint)
-        canvas.drawText("Signature and Date", 1150f, 1608f, myPaint)
+        canvas.drawText("Wrocław, $currentDate", 1180f, 50f, myPaint)
+        canvas.drawText("--------------------------------------",1140f, 1880f, myPaint)
+        canvas.drawText("Signature and Date", 1150f, 1908f, myPaint)
 
         myPaint.textAlign = Paint.Align.LEFT
-        canvas.drawText("$studentsData", 20f, 580f, myPaint)
-        canvas.drawText("Please consent to the ${chosenCase.lowercase()}", 20f, 1100f, myPaint)
+        canvas.drawText("Name, Id: $studentsDataId", 20f, 580f, myPaint)
+        canvas.drawText("Faculty: Faculty of Microsystems Electronics and Photonics", 20f, 622f, myPaint)
+        canvas.drawText("Year of study: $studentsDataYr, Semester: $studentsDataSem", 20f, 664f, myPaint)
+        canvas.drawText("Studies degree: $studentsDataDgr", 20f, 706f, myPaint)
+        canvas.drawText("Please consent to the ${chosenCase.lowercase()}.", 20f, 1350f, myPaint)
 
 
         pwrCase.finishPage(myPage1)
